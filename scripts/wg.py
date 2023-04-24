@@ -298,16 +298,17 @@ class Script(scripts.Script):
             p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, False)
         for i in range(len(p.all_negative_prompts)):
             p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, False)
-
-    def postprocess_image(self, p, pp, enabled, _, figure_braces_exif):
+    
+    def postprocess(self, p, processed, enabled, log_in_console, figure_braces_exif):
         if not enabled:
             return
         
         if figure_braces_exif:
-            image = pp.image
+            image = processed.images[0]
+            image = image.copy()
             custom_exif = create_infotext(p, [self.prompt], [p.subseed], [], iteration=p.iteration)
             print(f"\n{custom_exif}\n")
             image.info['parameters'] = custom_exif
-    
-    
+            processed.images[0] = image
+        return Processed(p, processed.images, p.seed, '')        
     
