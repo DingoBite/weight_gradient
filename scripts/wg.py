@@ -160,8 +160,6 @@ def preprocess_prompt(text, steps_count, is_log):
                 probable_weight = float(probable_weight)
                 pr_w_str = f" - {probable_weight}"
             
-            
-            
             start_weight = float(start_weight)
             end_weight = float(end_weight)
             
@@ -173,9 +171,7 @@ def preprocess_prompt(text, steps_count, is_log):
             
             if is_log:
                 print(f"\n{pr_mode}{dm_str}Tokens: \"{tokens}\". Segment: {start_step} - {end_step}.  Weights: {start_weight} - {end_weight}{pr_w_str}\n")
-            
-            
-            
+        
             step_range = end_step - start_step
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
@@ -233,6 +229,10 @@ def plot_dynamic(mode):
     return df
 
 class Script(scripts.Script):
+
+    def __init__(**args):
+        super(*args)
+        
 
     def title(self):
         return "Weight Gradient"
@@ -300,6 +300,9 @@ class Script(scripts.Script):
         return p
 
     def postprocess(self, p, processed, enabled, log_in_console, figure_braces_exif):
+        if not enabled:
+            return
+        
         if figure_braces_exif:
             custom_exif = create_infotext(p, [self.prompt], [p.subseed], [], iteration=p.iteration)
             processed.images[0].info['parameters'] = custom_exif
