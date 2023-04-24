@@ -189,13 +189,13 @@ def preprocess_prompt(text, steps_count, is_log):
             power = 3
             for i in range(step_range + 1):
                 weight = dynamic(i)
-                if weight <= start_step + float(f"1e-{power}"):
-                    weight = start_step
+                if weight <= start_weight + float(f"1e-{power}"):
+                    weight = start_weight
                 if i == step_range:
                     pr_str += f"{round(weight, power)}\n"
                 else:
                     pr_str += f"{round(weight, power)} | "
-                if weight == start_step:
+                if weight == start_weight:
                     continue
                 
                 if i == 0 and start_step == 1:
