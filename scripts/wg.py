@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 import math
 import gradio as gr
-from modules.processing import Processed, create_infotext
+from modules.processing import Processed, StableDiffusionProcessing, create_infotext
 import modules.scripts as scripts
 import modules.shared as shared
 from modules.script_callbacks import CFGDenoiserParams, on_cfg_denoiser, remove_current_script_callbacks
@@ -160,6 +160,8 @@ def preprocess_prompt(text, steps_count, is_log):
                 probable_weight = float(probable_weight)
                 pr_w_str = f" - {probable_weight}"
             
+            
+            
             start_weight = float(start_weight)
             end_weight = float(end_weight)
             
@@ -171,7 +173,9 @@ def preprocess_prompt(text, steps_count, is_log):
             
             if is_log:
                 print(f"\n{pr_mode}{dm_str}Tokens: \"{tokens}\". Segment: {start_step} - {end_step}.  Weights: {start_weight} - {end_weight}{pr_w_str}\n")
-        
+            
+            
+            
             step_range = end_step - start_step
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
@@ -186,16 +190,16 @@ def preprocess_prompt(text, steps_count, is_log):
             else:
                 dynamic = make_first_easing_func(dynamic_mode, start_weight, end_weight, step_range)
             pr_str = ''
-            power = 3
+            power = 2
             for i in range(step_range + 1):
                 weight = dynamic(i)
-                if weight <= start_weight + float(f"1e-{power}"):
-                    weight = start_weight
+                if abs(weight - start_step) < float(f"1e-{power}"):
+                    weight = start_step
                 if i == step_range:
                     pr_str += f"{round(weight, power)}\n"
                 else:
                     pr_str += f"{round(weight, power)} | "
-                if weight == start_weight:
+                if weight == start_step:
                     continue
                 
                 if i == 0 and start_step == 1:
@@ -207,18 +211,13 @@ def preprocess_prompt(text, steps_count, is_log):
                 prompt += " " + right_tokens
             if is_log:
                 print(pr_str)
-                print(prompt)
             
         if i == 0:
-            with open('test_log.txt', 'a') as f:
-                f.write(f'\n--------------\nError: not find match: {text}\n--------------\n')
             return text
         
-        with open('test_log.txt', 'a') as f:
-            f.write(f'{prompt}\n\n')
         return prompt
     except Exception as e:
-        print(e)
+        # print(e)
         return text
 
 
@@ -230,6 +229,7 @@ def plot_dynamic(mode):
     return df
 
 class Script(scripts.Script):
+
     def title(self):
         return "Weight Gradient"
 
@@ -239,8 +239,8 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         with gr.Accordion("Weight Gradient", open=False):                                                          
             with gr.Row(equal_height=True):
-                enabled = gr.Checkbox(label="Enable")
-                log_in_console = gr.Checkbox(label="Log in console", value=False)
+                enabled = gr.Checkbox(label="Enable", value=True)
+                log_in_console = gr.Checkbox(label="Log in console", value=True)
                 figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=True)
             with gr.Tabs():
                 with gr.TabItem(label="Documentation", id=1):
@@ -284,29 +284,30 @@ class Script(scripts.Script):
             
         return [enabled, log_in_console, figure_braces_exif]
     
-    def process(self, p, enabled, log_in_console, figure_braces_exif):    
-        with open('test_log.txt', 'a') as f:
-            f.write(f'\nrun:{enabled}, {log_in_console}, {figure_braces_exif}\n')
-        if not enabled:
-            return
-        self.prompt = p.prompt
-        steps = p.steps
-        
-        p.prompt = preprocess_prompt(p.prompt, steps, log_in_console)
-        return p
-
-    def postprocess(self, p, processed, enabled, log_in_console, figure_braces_exif):
+    def process(self, p : StableDiffusionProcessing, enabled, log_in_console, figure_braces_exif):    
         if not enabled:
             return
         
         if figure_braces_exif:
-            custom_exif = create_infotext(p, [self.prompt], [p.subseed], [], iteration=p.iteration)
-            processed.images[0].info['parameters'] = custom_exif
-        pass
-    
+            self.prompt = p.prompt
+            self.all_prompts = list.copy(p.all_prompts)
+            self.all_negative_prompts = list.copy(p.all_negative_prompts)
+            
+        p.prompt = preprocess_prompt(p.prompt, p.steps, log_in_console)
+        for i in range(len(p.all_prompts)):
+            p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, False)
+        for i in range(len(p.all_negative_prompts)):
+            p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, False)
 
-if __name__ == "__main__":
-    text = "{urban landscape :: 1 - 0 - 1 : eo} {Jungle: 5 - 15: 0 - 1}, magic sphere, soft light, realistic, imagination, artstation, fantasy, detailed, hdr, cinematic"
-    processed_text = preprocess_prompt(text, 10)
-    print(processed_text)
+    def postprocess_image(self, p, pp, enabled, _, figure_braces_exif):
+        if not enabled:
+            return
+        
+        if figure_braces_exif:
+            image = pp.image
+            custom_exif = create_infotext(p, [self.prompt], [p.subseed], [], iteration=p.iteration)
+            print(f"\n{custom_exif}\n")
+            image.info['parameters'] = custom_exif
+    
+    
     
