@@ -229,11 +229,6 @@ def plot_dynamic(mode):
     return df
 
 class Script(scripts.Script):
-
-    def __init__(**args):
-        super(*args)
-        
-
     def title(self):
         return "Weight Gradient"
 
