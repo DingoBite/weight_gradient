@@ -306,7 +306,7 @@ class Script(scripts.Script):
         if figure_braces_exif:
             image = processed.images[0]
             image = image.copy()
-            custom_exif = create_infotext(p, [self.prompt], p.seed, [], iteration=p.iteration)
+            custom_exif = create_infotext(p, [self.prompt], [p.seed], [], iteration=p.iteration)
             # print(f"\n{custom_exif}\n")
             image.info['parameters'] = custom_exif
             processed.images[0] = image
