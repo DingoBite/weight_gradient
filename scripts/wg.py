@@ -186,10 +186,10 @@ def preprocess_prompt(text, steps_count, is_log):
             else:
                 dynamic = make_first_easing_func(dynamic_mode, start_weight, end_weight, step_range)
             pr_str = ''
-            power = 2
+            power = 3
             for i in range(step_range + 1):
                 weight = dynamic(i)
-                if weight < float(f"1e-{power}"):
+                if weight <= start_step + float(f"1e-{power}"):
                     weight = start_step
                 if i == step_range:
                     pr_str += f"{round(weight, power)}\n"
