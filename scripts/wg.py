@@ -207,6 +207,7 @@ def preprocess_prompt(text, steps_count, is_log):
                 prompt += " " + right_tokens
             if is_log:
                 print(pr_str)
+                print(prompt)
             
         if i == 0:
             with open('test_log.txt', 'a') as f:
