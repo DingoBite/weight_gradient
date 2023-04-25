@@ -25,8 +25,8 @@ class EasingBase:
         raise NotImplementedError
 
     def ease(self, alpha):
-        alpha /= self.duration
         t = self.limit[0] * (1 - alpha) + self.limit[1] * alpha
+        t /= self.duration
         a = self.func(t)
         return self.end * a + self.start * (1 - a)
 
@@ -124,10 +124,17 @@ def make_second_easing_func(easing_code, start, end, duration):
 def isempty(value):
     return value == '' or value.isspace()
 
-pattern = r'([^{}]*)\s*\{\s*(\w+\s*:|\s*)\s*([^{}]+)\s*:\s*(\d+\s*-\s*\d+|\s*)\s*:\s*([0-9]*\.[0-9]+|[0-9]+)\s*-\s*([0-9]*\.[0-9]+|[0-9]+)\s*(\s*-\s*([0-9]*\.[0-9]+|[0-9]+)|\s*)\s*(\s*:\s*\w+|\s*)\s*\}\s*([^{}]*)'
+def clamp(value, min_v, max_v):
+    if value < min_v:
+        return min_v
+    elif value > max_v:
+        return max_v
+    return value
+
 
 def preprocess_prompt(text, steps_count, is_log):
     try:
+        pattern = r'([^{}]*)\s*\{\s*(\w+\s*:|\s*)\s*([^{}]+)\s*:\s*((?:[0-9]*\.[0-9]+|[0-9]+)\s*-\s*(?:[0-9]*\.[0-9]+|[0-9]+)|\s*)\s*:\s*([0-9]*\.[0-9]+|[0-9]+)\s*-\s*([0-9]*\.[0-9]+|[0-9]+)\s*(\s*-\s*([0-9]*\.[0-9]+|[0-9]+)|\s*)\s*(\s*:\s*\w+|\s*)\s*\}\s*([^{}]*)'
         prompt = text
         matches = re.finditer(pattern, text)
         
@@ -147,8 +154,13 @@ def preprocess_prompt(text, steps_count, is_log):
             
             if not isempty(steps):
                 split_steps = steps.split('-')
-                start_step = int(split_steps[0])
-                end_step = int(split_steps[1])
+                start_step = float(split_steps[0])
+                end_step = float(split_steps[1])
+                if start_step < 1 or end_step < 1:
+                    start_step = steps_count * clamp(start_step, 0 , 1)
+                    end_step = steps_count * clamp(end_step, 0 , 1)
+                start_step = int(start_step)
+                end_step = int(end_step)
             else:
                 start_step = 1
                 end_step = steps_count
@@ -177,6 +189,8 @@ def preprocess_prompt(text, steps_count, is_log):
             
             
             step_range = end_step - start_step
+            if step_range <= 1:
+                return
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
                 first = make_first_easing_func(dynamic_mode, start_weight, end_weight, int_range)
@@ -244,45 +258,46 @@ class Script(scripts.Script):
                 enabled = gr.Checkbox(label="Enable", value=True)
                 log_in_console = gr.Checkbox(label="Log in console", value=True)
                 figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=True)
-            with gr.Tabs():
-                with gr.TabItem(label="Documentation", id=1):
-                    gr.HighlightedText(label="Form",
-                        value=[
-                            ("{", None), 
-                            ("redhead girl", "Required. Tokens"),
-                            (":", None), 
-                            ("start - end","Optional. Steps where weight changes"),
-                            (":", None), 
-                            ("start - end","Required. Weight start to end range"),
-                            ("- return", "Optional. Weight move to return weight"),
-                            (": mode", "Optional. Gradient mode (e, ei, eo, c, ci, co)"),
-                            ("}", None),
-                            ],
-                        combine_adjacent=True,
-                        show_legend=True).style(color_map={
-                            "Required. Tokens": "red",
-                            "Required. Weight start to end range": "red",
-                            "Optional. Steps where weight changes": "yellow",
-                            "Optional. Weight move to return weight": "yellow",
-                            "Optional. Gradient mode (e, ei, eo, c, ci, co)": "yellow",
-                            })
-                    
-                    gr.HighlightedText(label="Examples",
-                        value=[
-                            ("{dog : 1 - 22 : 1 - 0}", "Linear decreasing from 1 to 0 in 22 steps"), 
-                            ("{cat : 1 - 15 : 1 - 0 - 1: e}", "Exponencial decreasing from 1 to 0 in 8 steps that increasing from 0 to 1 in 7 steps"), 
-                            ("{друже :: 0 - 1: c}", "Circle increasing from 0 to 1 at every step"), 
-                            ],
-                        combine_adjacent=True,
-                        show_legend=True)
-                with gr.TabItem(label="Modes Hint", id=2):
-                    for d in sorted(dynamics):
-                        name = f"{dynamics[d]}: {d}"
-                        df_e = plot_dynamic(d)
-                        gr.LinePlot(value=df_e, x="time", y="weight", title=name,
-                                    width=100,
-                                    height=100,
-                                    interactive=False)
+            with gr.Accordion("Info", open=False):                                                          
+                with gr.Tabs():
+                    with gr.TabItem(label="Documentation", id=1):
+                        gr.HighlightedText(label="Form",
+                            value=[
+                                ("{", None), 
+                                ("redhead girl", "Required. Tokens"),
+                                (":", None), 
+                                ("start - end","Optional. Steps where weight changes"),
+                                (":", None), 
+                                ("start - end","Required. Weight start to end range"),
+                                ("- return", "Optional. Weight move to return weight"),
+                                (": mode", "Optional. Gradient mode (e, ei, eo, c, ci, co)"),
+                                ("}", None),
+                                ],
+                            combine_adjacent=True,
+                            show_legend=True).style(color_map={
+                                "Required. Tokens": "red",
+                                "Required. Weight start to end range": "red",
+                                "Optional. Steps where weight changes": "yellow",
+                                "Optional. Weight move to return weight": "yellow",
+                                "Optional. Gradient mode (e, ei, eo, c, ci, co)": "yellow",
+                                })
+                        
+                        gr.HighlightedText(label="Examples",
+                            value=[
+                                ("{dog : 1 - 22 : 1 - 0}", "Linear decreasing from 1 to 0 in 22 steps"), 
+                                ("{cat : 1 - 15 : 1 - 0 - 1: e}", "Exponencial decreasing from 1 to 0 in 8 steps that increasing from 0 to 1 in 7 steps"), 
+                                ("{друже :: 0 - 1: c}", "Circle increasing from 0 to 1 at every step"), 
+                                ],
+                            combine_adjacent=True,
+                            show_legend=True)
+                    with gr.TabItem(label="Modes Hint", id=2):
+                        for d in sorted(dynamics):
+                            name = f"{dynamics[d]}: {d}"
+                            df_e = plot_dynamic(d)
+                            gr.LinePlot(label=dynamics[d], value=df_e, x="time", y="weight", title=d,
+                                        width=200,
+                                        height=100,
+                                        interactive=False)
             
         return [enabled, log_in_console, figure_braces_exif]
     
