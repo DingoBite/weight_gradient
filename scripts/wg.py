@@ -5,11 +5,8 @@ import math
 import gradio as gr
 from modules.processing import Processed, StableDiffusionProcessing, create_infotext
 import modules.scripts as scripts
-import modules.shared as shared
-from modules.script_callbacks import CFGDenoiserParams, on_cfg_denoiser, remove_current_script_callbacks
 import re
 from modules.processing import process_images, Processed
-import matplotlib as plt
 
 
 class EasingBase:
@@ -172,8 +169,6 @@ def preprocess_prompt(text, steps_count, is_log):
                 probable_weight = float(probable_weight)
                 pr_w_str = f" - {probable_weight}"
             
-            
-            
             start_weight = float(start_weight)
             end_weight = float(end_weight)
             
@@ -199,7 +194,7 @@ def preprocess_prompt(text, steps_count, is_log):
                     if i <= int_range:
                         return first(i)
                     else:
-                        return second(i - int_range)
+                        return second(i - int_range + int_range % 2)
                 dynamic = dynamic_func
             else:
                 dynamic = make_first_easing_func(dynamic_mode, start_weight, end_weight, step_range)
@@ -220,6 +215,8 @@ def preprocess_prompt(text, steps_count, is_log):
                 
                 if i == 0 and start_step == 1:
                     prompt += f"([{tokens}:: {start_step}] : {weight})"
+                elif i == step_range:
+                    prompt += f"([{tokens}: {start_step + i}]:{weight})"
                 else:
                     prompt += f"([[{tokens}: {start_step + i - 1}] :: {start_step + i}]:{weight})"
 
