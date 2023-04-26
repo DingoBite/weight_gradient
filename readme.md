@@ -17,6 +17,8 @@ Next, enable the extension in the newly appeared tab. Now you have a new way of 
 *gradient_mode* - the formula of weight change during the gradient process. It can be one of: a, e, ei, eo, c, ci, co.
 *OPTIONAL: If no parameter is specified, the mode is linear (a). See examples for clarify.*
 
+***You can use many of these constructions in one prompt***
+
 There are illustrations of the gradient modes in the "Modes Hints" tab of extension.
 
 
