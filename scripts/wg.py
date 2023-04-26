@@ -255,9 +255,9 @@ class Script(scripts.Script):
                 enabled = gr.Checkbox(label="Enable", value=True)
                 log_in_console = gr.Checkbox(label="Log in console", value=True)
                 figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=True)
-            with gr.Accordion("Info", open=False):                                                          
+            with gr.Accordion("Documentation", open=False):                                                          
                 with gr.Tabs():
-                    with gr.TabItem(label="Documentation", id=1):
+                    with gr.TabItem(label="Info", id=1):
                         gr.HighlightedText(label="Form",
                             value=[
                                 ("{", None), 
@@ -274,16 +274,16 @@ class Script(scripts.Script):
                             show_legend=True).style(color_map={
                                 "Required. Tokens": "red",
                                 "Required. Weight start to end range": "red",
-                                "Optional. Steps where weight changes": "yellow",
-                                "Optional. Weight move to return weight": "yellow",
-                                "Optional. Gradient mode (e, ei, eo, c, ci, co)": "yellow",
+                                "Steps where weight changes": "yellow",
+                                "Weight move to return weight": "yellow",
+                                "Gradient mode (e, ei, eo, c, ci, co)": "yellow",
                                 })
                         
                         gr.HighlightedText(label="Examples",
                             value=[
-                                ("{dog : 1 - 22 : 1 - 0}", "Linear decreasing from 1 to 0 in 22 steps"), 
-                                ("{cat : 1 - 15 : 1 - 0 - 1: e}", "Exponencial decreasing from 1 to 0 in 8 steps that increasing from 0 to 1 in 7 steps"), 
-                                ("{друже :: 0 - 1: c}", "Circle increasing from 0 to 1 at every step"), 
+                                ("{dog : 0.1 - 0.3 : 1 - 0}", "Linear decreasing from 1 to 0 in 20% of (10% - 30%) steps"), 
+                                ("{cat : 1 - 15 : 1 - 0 - 1 : e}", "Exponencial decreasing from 1 to 0 in 8 steps that increasing from 0 to 1 in 7 steps"), 
+                                ("{друже :: 0 - 1 : c}", "Circle increasing from 0 to 1 at every step"), 
                                 ],
                             combine_adjacent=True,
                             show_legend=True)
