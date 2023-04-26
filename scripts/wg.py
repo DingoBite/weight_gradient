@@ -323,9 +323,9 @@ class Script(scripts.Script):
             image = image.copy()
             p.all_negative_prompts = self.all_negative_prompts
             p.all_prompts = self.all_negative_prompts
-            custom_exif = create_infotext(p, [self.prompt], [p.seed], [], iteration=p.iteration)
+            custom_exif = create_infotext(p, [self.prompt], p.all_seeds, [], iteration=p.iteration)
             # print(f"\n{custom_exif}\n")
             image.info['parameters'] = custom_exif
             processed.images[0] = image
-        return Processed(p, processed.images, p.seed, '')
+        return Processed(p, processed.images, p.all_seeds, '')
     
