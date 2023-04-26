@@ -189,12 +189,12 @@ def preprocess_prompt(text, steps_count, is_log):
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
                 first = make_first_easing_func(dynamic_mode, start_weight, end_weight, int_range)
-                second = make_second_easing_func(dynamic_mode, end_weight, probable_weight, int_range + int_range % 2)
+                second = make_second_easing_func(dynamic_mode, end_weight, probable_weight, int_range)
                 def dynamic_func(i):
                     if i <= int_range:
                         return first(i)
                     else:
-                        return second(i - int_range + int_range % 2)
+                        return second(i - int_range)
                 dynamic = dynamic_func
             else:
                 dynamic = make_first_easing_func(dynamic_mode, start_weight, end_weight, step_range)
