@@ -281,8 +281,8 @@ class Script(scripts.Script):
                         
                         gr.HighlightedText(label="Examples",
                             value=[
-                                ("{dog : 0.1 - 0.3 : 1 - 0}", "Linear decreasing from 1 to 0 in 20% of (10% - 30%) steps"), 
-                                ("{cat : 1 - 15 : 1 - 0 - 1 : e}", "Exponencial decreasing from 1 to 0 in 8 steps that increasing from 0 to 1 in 7 steps"), 
+                                ("{dog : 0.1 - 0.3 : 1 - 0}", "Linear decreasing from 1 to 0 in 20% of steps (10% - 30%)"), 
+                                ("{cat : 1 - 15 : 1 - 0 - 1 : e}", "Exponencial decreasing from 1 to 0 in 8 steps then increasing from 0 to 1 in 7 steps"), 
                                 ("{друже :: 0 - 1 : c}", "Circle increasing from 0 to 1 at every step"), 
                                 ],
                             combine_adjacent=True,
