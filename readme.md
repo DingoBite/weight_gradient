@@ -18,6 +18,7 @@ Next, enable the extension in the newly appeared tab. Now you have a new way of 
 *OPTIONAL: If no parameter is specified, the mode is linear (a). See examples for clarify.*
 
 ***You can use many of these constructions in one prompt***
+
 ***After process weight save the end weight. For example, { dog : 1 - 10 : 0 - 1 } -> .... [dog : 1]***
 
 There are illustrations of the gradient modes in the "Modes Hints" tab of extension.
