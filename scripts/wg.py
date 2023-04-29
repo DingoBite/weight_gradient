@@ -155,6 +155,8 @@ def preprocess_prompt(text, steps_count, is_log):
                 end_step = float(split_steps[1])
                 if start_step < 1 or end_step < 1:
                     start_step = steps_count * clamp(start_step, 0 , 1)
+                    if start_step == 0:
+                        start_step = 1
                     end_step = steps_count * clamp(end_step, 0 , 1)
                 start_step = int(start_step)
                 end_step = int(end_step)
