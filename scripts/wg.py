@@ -118,8 +118,8 @@ def make_second_easing_func(easing_code, start, end, duration):
     else:
         return LinearInOut(start, end, duration)
 
-def isempty(value):
-    return value == '' or value.isspace()
+def is_valid_tokens(value):
+    return value == '' or value.isspace() or value is None
 
 def clamp(value, min_v, max_v):
     if value < min_v:
@@ -141,15 +141,15 @@ def preprocess_prompt(text, steps_count, is_log):
             i += 1
             left_tokens, process_mode, tokens, steps, start_weight, end_weight, probable_weight_group, probable_weight, dynamic_mode, right_tokens = m.groups()
             
-            if not isempty(left_tokens):
+            if not is_valid_tokens(left_tokens):
                 prompt += left_tokens + " "
                 
             pr_mode = ''
-            is_process_mode = not isempty(process_mode)
+            is_process_mode = not is_valid_tokens(process_mode)
             if is_process_mode:
                 pr_mode = f"Process code: {process_mode}. "
             
-            if not isempty(steps):
+            if not is_valid_tokens(steps):
                 split_steps = steps.split('-')
                 start_step = float(split_steps[0])
                 end_step = float(split_steps[1])
@@ -163,7 +163,7 @@ def preprocess_prompt(text, steps_count, is_log):
                 end_step = steps_count
             
             pr_w_str = ''
-            is_probable_weight = not isempty(probable_weight_group)
+            is_probable_weight = not is_valid_tokens(probable_weight_group)
             if is_probable_weight:
                 probable_weight = probable_weight.replace("-", '')
                 probable_weight = float(probable_weight)
@@ -173,7 +173,7 @@ def preprocess_prompt(text, steps_count, is_log):
             end_weight = float(end_weight)
             
             dm_str = ''
-            is_dynamic_mode = not isempty(dynamic_mode)
+            is_dynamic_mode = not is_valid_tokens(dynamic_mode)
             dynamic_mode = dynamic_mode.replace(":", '').replace(" ", '')
             if is_dynamic_mode:
                 dm_str += f"Dynamic mode: {dynamic_mode}. "
@@ -185,7 +185,7 @@ def preprocess_prompt(text, steps_count, is_log):
             
             step_range = end_step - start_step
             if step_range <= 1:
-                return
+                return text
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
                 offset = step_range % 2
@@ -221,7 +221,7 @@ def preprocess_prompt(text, steps_count, is_log):
                 else:
                     prompt += f"([[{tokens}: {start_step + i - 1}] :: {start_step + i}]:{weight})"
 
-            if not isempty(right_tokens):
+            if not is_valid_tokens(right_tokens):
                 prompt += " " + right_tokens
             if is_log:
                 print(pr_str)
@@ -310,9 +310,13 @@ class Script(scripts.Script):
             
         p.prompt = preprocess_prompt(p.prompt, p.steps, log_in_console)
         for i in range(len(p.all_prompts)):
-            p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, False)
+            if is_valid_tokens(p.all_prompts[i]):
+                continue
+            p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, log_in_console)
         for i in range(len(p.all_negative_prompts)):
-            p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, False)
+            if is_valid_tokens(p.all_negative_prompts[i]):
+                continue
+            p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, log_in_console)
     
     def postprocess(self, p, processed, enabled, log_in_console, figure_braces_exif):
         if not enabled:
@@ -324,7 +328,6 @@ class Script(scripts.Script):
             p.all_negative_prompts = self.all_negative_prompts
             p.all_prompts = self.all_negative_prompts
             custom_exif = create_infotext(p, [self.prompt], p.all_seeds, [], iteration=p.iteration)
-            # print(f"\n{custom_exif}\n")
             image.info['parameters'] = custom_exif
             processed.images[0] = image
         return Processed(p, processed.images, p.all_seeds, '')
