@@ -312,7 +312,7 @@ class Script(scripts.Script):
         for i in range(len(p.all_prompts)):
             if is_valid_tokens(p.all_prompts[i]):
                 continue
-            p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, log_in_console)
+            p.all_prompts[i] = preprocess_prompt(p.all_prompts[i], p.steps, False)
         for i in range(len(p.all_negative_prompts)):
             if is_valid_tokens(p.all_negative_prompts[i]):
                 continue
