@@ -256,8 +256,11 @@ class Script(scripts.Script):
         with gr.Accordion("Weight Gradient", open=False):                                                          
             with gr.Row(equal_height=True):
                 enabled = gr.Checkbox(label="Enable", value=False)
+                enabled = False
                 log_in_console = gr.Checkbox(label="Log in console", value=False)
+                log_in_console = False
                 figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=False)
+                figure_braces_exif = False
             with gr.Accordion("Documentation", open=False):                                   
                 with gr.Tabs():
                     with gr.TabItem(label="Info", id=1):
