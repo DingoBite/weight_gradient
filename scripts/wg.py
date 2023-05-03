@@ -310,6 +310,7 @@ class Script(scripts.Script):
             return
         
         if figure_braces_exif_checkbox:
+            p.do_not_save_samples = True
             self.prompt = p.prompt
             self.all_prompts = list.copy(p.all_prompts)
             self.all_negative_prompts = list.copy(p.all_negative_prompts)
