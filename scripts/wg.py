@@ -255,9 +255,9 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         with gr.Accordion("Weight Gradient", open=False):                                                          
             with gr.Row(equal_height=True):
-                enabled = gr.Checkbox(label="Enable")
-                log_in_console = gr.Checkbox(label="Log in console")
-                figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF")
+                enabled = gr.Checkbox(label="Enable", value=False)
+                log_in_console = gr.Checkbox(label="Log in console", value=False)
+                figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=False)
             with gr.Accordion("Documentation", open=False):                                   
                 with gr.Tabs():
                     with gr.TabItem(label="Info", id=1):
