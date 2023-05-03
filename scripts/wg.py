@@ -3,10 +3,14 @@ import pandas as pd
 import torch
 import math
 import gradio as gr
+from PIL import Image
 from modules.processing import Processed, StableDiffusionProcessing, create_infotext
 import modules.scripts as scripts
 import re
 from modules.processing import process_images, Processed
+from modules.scripts import PostprocessImageArgs
+import modules.images as images
+from modules.shared import opts, cmd_opts
 
 
 class EasingBase:
@@ -255,10 +259,10 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         with gr.Accordion("Weight Gradient", open=False):                                                          
             with gr.Row(equal_height=True):
-                enabled = gr.Checkbox(label="Enable", value=False)
-                log_in_console = gr.Checkbox(label="Log in console", value=False)
-                figure_braces_exif = gr.Checkbox(label="FigureBracesEXIF", value=False)
-            with gr.Accordion("Documentation", open=False):                                   
+                enabled_checkbox = gr.Checkbox(label="Enable", value=False)
+                log_in_console_checkbox = gr.Checkbox(label="Log in console", value=False)
+                figure_braces_exif_checkbox = gr.Checkbox(label="FigureBracesEXIF", value=False)
+            with gr.Accordion("Documentation", open=False):
                 with gr.Tabs():
                     with gr.TabItem(label="Info", id=1):
                         gr.HighlightedText(label="Form",
@@ -299,18 +303,19 @@ class Script(scripts.Script):
                                         height=100,
                                         interactive=False)
             
-        return [enabled, log_in_console, figure_braces_exif]
+        return [enabled_checkbox, log_in_console_checkbox, figure_braces_exif_checkbox]
     
-    def process(self, p : StableDiffusionProcessing, enabled, log_in_console, figure_braces_exif):    
-        if not enabled:
+    def process(self, p : StableDiffusionProcessing, enabled_checkbox, log_in_console_checkbox, figure_braces_exif_checkbox):    
+        if not enabled_checkbox:
             return
         
-        if figure_braces_exif:
+        if figure_braces_exif_checkbox:
             self.prompt = p.prompt
             self.all_prompts = list.copy(p.all_prompts)
             self.all_negative_prompts = list.copy(p.all_negative_prompts)
-            
-        p.prompt = preprocess_prompt(p.prompt, p.steps, log_in_console)
+        prev_prompt = p.prompt
+        p.prompt = preprocess_prompt(p.prompt, p.steps, log_in_console_checkbox)
+        self.is_proc = prev_prompt != p.prompt
         for i in range(len(p.all_prompts)):
             if is_valid_tokens(p.all_prompts[i]):
                 continue
@@ -318,19 +323,14 @@ class Script(scripts.Script):
         for i in range(len(p.all_negative_prompts)):
             if is_valid_tokens(p.all_negative_prompts[i]):
                 continue
-            p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, log_in_console)
+            p.all_negative_prompts[i] = preprocess_prompt(p.all_negative_prompts[i], p.steps, log_in_console_checkbox)
     
-    def postprocess(self, p, processed, enabled, log_in_console, figure_braces_exif):
-        if not enabled:
+    def postprocess_image(self, p: StableDiffusionProcessing, pp: PostprocessImageArgs, enabled_checkbox, _, figure_braces_exif_checkbox):
+        if not enabled_checkbox or not self.is_proc:
             return
         
-        if figure_braces_exif:
-            image = processed.images[0]
-            image = image.copy()
-            p.all_negative_prompts = self.all_negative_prompts
-            p.all_prompts = self.all_negative_prompts
-            custom_exif = create_infotext(p, [self.prompt], p.all_seeds, [], iteration=p.iteration)
-            image.info['parameters'] = custom_exif
-            processed.images[0] = image
-        return Processed(p, processed.images, p.all_seeds, '')
+        if figure_braces_exif_checkbox:
+            img : Image.Image = pp.image
+            custom_exif = create_infotext(p, self.all_prompts, p.all_seeds, p.all_subseeds, '')
+            images.save_image(img, p.outpath_samples, "", p.seed, self.prompt, opts.samples_format, info=custom_exif, p=p, suffix="_figbr")
     
