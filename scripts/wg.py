@@ -310,13 +310,14 @@ class Script(scripts.Script):
             return
         
         if figure_braces_exif_checkbox:
-            p.do_not_save_samples = True
             self.prompt = p.prompt
             self.all_prompts = list.copy(p.all_prompts)
             self.all_negative_prompts = list.copy(p.all_negative_prompts)
         prev_prompt = p.prompt
         p.prompt = preprocess_prompt(p.prompt, p.steps, log_in_console_checkbox)
         self.is_proc = prev_prompt != p.prompt
+        p.do_not_save_samples = self.is_proc and figure_braces_exif_checkbox
+        
         for i in range(len(p.all_prompts)):
             if is_valid_tokens(p.all_prompts[i]):
                 continue
