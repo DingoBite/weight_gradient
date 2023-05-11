@@ -190,7 +190,8 @@ def preprocess_prompt(text, steps_count, is_log):
             
             
             step_range = end_step - start_step
-            if step_range <= 1:
+            if step_range < 1:
+                print(f"Parse error:{text}")
                 return text
             if is_probable_weight:
                 int_range = int(step_range * 0.5)
