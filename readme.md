@@ -91,6 +91,6 @@ Dynamic mode: c. Tokens: "redhead girl, drinking coffee ". Segment: 1 - 22.  Wei
 
 # Images
 
-![](https://github.com/DingoBite/weight_gradient/edit/master/samples/1.png)
-![](https://github.com/DingoBite/weight_gradient/edit/master/samples/2.png)
-![](https://github.com/DingoBite/weight_gradient/edit/master/samples/3.png)
+![1](https://github.com/DingoBite/weight_gradient/edit/master/samples/1.png)
+![2](https://github.com/DingoBite/weight_gradient/edit/master/samples/2.png)
+![3](https://github.com/DingoBite/weight_gradient/edit/master/samples/3.png)
