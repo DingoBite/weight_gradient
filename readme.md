@@ -88,3 +88,5 @@ Dynamic mode: c. Tokens: "redhead girl, drinking coffee ". Segment: 1 - 22.  Wei
 ***Вы можете использовать множество конструкций в одном промпте***
 
 Иллюстрации режимов градиента можно найти на вкладке "Modes Hints" расширения.
+
+![alt text](https://github.com/DingoBite/weight_gradient/edit/master/samples/1.png)
