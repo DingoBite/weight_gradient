@@ -334,6 +334,7 @@ class Script(scripts.Script):
         
         if figure_braces_exif_checkbox:
             img : Image.Image = pp.image
+            p.all_negative_prompts = self.all_negative_prompts
             custom_exif = create_infotext(p, self.all_prompts, p.all_seeds, p.all_subseeds, '')
             images.save_image(img, p.outpath_samples, "", p.seed, self.prompt, opts.samples_format, info=custom_exif, p=p, suffix="_figbr")
     
